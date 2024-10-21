@@ -4,12 +4,14 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
 
 def index(request):
     return render(request, 'myapp/index.html')
 
 def dashboard(request):
     return render(request, 'myapp/dashboard.html')
+
 
 def register_view(request):
     if request.method == "POST":
@@ -48,7 +50,21 @@ def login_view(request):
 
 # Handle user logout
 def logout_view(request):
+    print("hello   ")
     # Django's logout function clears the session
     logout(request)
     # Redirect to the login page after logout
     return redirect('/')  # Replace 'index' with your login page URL name
+
+def trash_view(request):
+    return render(request, 'myapp/trash.html')
+
+@login_required
+def account_view(request):
+    user = request.user  # Get logged-in user
+    context = {
+        'username': user.username,
+        'email': user.email,
+        'date_joined': user.date_joined,
+    }
+    return render(request, 'myapp/account.html', context)
