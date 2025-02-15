@@ -1,0 +1,561 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Email Writer</title>
+    <link rel="stylesheet" type="text/css" href="{% static '/css/style.css' %}">
+    <!-- Include Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+    <!-- Include jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Include Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <style>
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"], input[type="password"], input[type="email"] {
+            width: 100%;
+            padding: 8px;
+            margin: 6px 0;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .register-btn, .login-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+        }
+        .active-form {
+            display: block;
+        }
+        .form-section > div {
+            display: none; /* Hide all forms by default */
+        }
+
+        .form-section > div.active-form {
+            display: block; /* Show the active form */
+        }
+
+        .result{
+            white-space: pre-wrap; /* Ensures the text wraps and respects line breaks */
+            word-wrap: break-word; 
+        }
+
+        .output{
+            white-space: pre-wrap; /* Ensures the text wraps and respects line breaks */
+            word-wrap: break-word; 
+        }
+    </style>
+    <style>
+        .select2-container--default .select2-selection--single {
+            height: 35px; 
+            display: flex;
+            /* align-items: center;  */
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            font-size: 16px;
+            line-height: 35px; 
+            align-items: end;
+        }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo">
+            <span>Email Generator using AI</span>
+        </div>
+        <nav class="nav-links">
+            <a href="#">How it works</a>
+            <a href="#">Features</a>
+            <button class="install-btn-1" id="openRegisterModal">Register</button> <!-- Register button -->
+            <button class="install-btn-2" id="openModalBtn">Sign in</button> <!-- Sign in button -->
+        </nav>
+    </header>
+    <main>
+        <aside class="sidebar">
+            <h3>AI Email Tools</h3>
+            <ul>
+                <li><a href="#" onclick="showForm('subjectLineForm')">Subject Line Generator</a></li>
+                <li><a href="#" onclick="showForm('emailWriterForm')">Email Generator</a></li>
+                <li><a href="#" onclick="showForm('replyEmailForm')">Reply Email Generator</a></li>
+            </ul>
+        </aside>
+        <section class="form-section-container">
+            <!-- Subject Line Generator Form -->
+            <div class="form-section">
+            <div id="subjectLineForm" class="form-section-1">
+                <h2>Subject Line Generator</h2>
+                <hr class="divider">
+                <form method="POST" action="" id="subjectGeneratorForm">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="subject">Enter Content:</label>
+                        <textarea id="subject" name="subject" required cols="70" rows="10"></textarea>
+                    </div>
+                    <button type="submit">Generate Subject Line</button>
+                </form>
+            </div>
+            </div>
+            <!-- Email Writer Form -->
+            <div class="form-section">
+            <div id="emailWriterForm" class="form-section-2">
+                <h2>Email Generator</h2>
+                <hr class="divider">
+                <form method="POST" id="emailGeneratorForm">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="emailTopic">Email Topic:</label>
+                        <input type="text" id="emailTopic" name="emailTopic" required style="width: 100%;">
+                        <label for="tone">Tone</label>
+                        <select id="tone" class="dropdown" style="width: 500px;"> <!-- Default Neutral option -->
+                            <option value="accusatory">Accusatory 👎</option>
+                            <option value="angry">Angry 😡</option>
+                            <option value="appreciative">Appreciative 🙌</option>
+                            <option value="assertive">Assertive ☝</option>
+                            <option value="concerned">Concerned 😟</option>
+                            <option value="confident">Confident 💪</option>
+                            <option value="cooperative">Cooperative 🤝</option>
+                            <option value="curious">Curious 🧐</option>
+                            <option value="disapproving">Disapproving 😠</option>
+                            <option value="disheartening">Disheartening 😞</option>
+                            <option value="egocentric">Egocentric 😤</option>
+                            <option value="empathetic">Empathetic 😌</option>
+                            <option value="encouraging">Encouraging 👍</option>
+                            <option value="enthusiastic">Enthusiastic 😃</option>
+                            <option values="excited">Excited 🤩</option>
+                            <option value="friendly">Friendly 😉</option>
+                            <option value="funny">Funny 😂</option>
+                            <option value="joyful">Joyful 😊</option>
+                            <option value="neutral" selected>Neutral 😐</option>
+                            <option value="optimistic">Optimistic ✌️</option>
+                            <option value="regertful">Regretful 😥</option>
+                            <option value="sad">Sad 🙁</option>
+                            <option value="serious">Serious 😐</option>
+                            <option value="surprised">Surprised 😮</option>
+                            <option value="unassuming">Unasumming  🙄</option>
+                            <option value="worried">Worried 😨</option>
+                        </select>
+                        <label for="writing-style" style="margin-top: 7px;">Writing style</label>
+                        <select id="writing-style" style="width: 500px;">
+                            <optgroup label="Default">
+                                <option value="casual">Casual</option>
+                                <option value="formal">Formal</option>
+                            </optgroup>
+                            <optgroup label="Expository">
+                                <option value="academic">Academic</option>
+                                <option value="business">Business</option>
+                                <option value="essay">Essay</option>
+                                <option value="how-to">How-to</option>
+                                <option value="instructions">Instructions</option>
+                                <option value="journalism">Journalism</option>
+                                <option value="legal">Legal</option>
+                            </optgroup>
+                            <optgroup label="Persuasive">
+                                <option value="advertising">Advertising</option>
+                                <option value="cover letter">Cover Letter</option>
+                                <option value="editorial">Editorial</option>
+                                <option value="letter of recommendation">Letter of Recommendation</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="opinion">Opinion</option>
+                                <option value="review">Review</option>
+                                <option value="sale">Sale</option>
+                            </optgroup>
+                        </select>
+                        <label for="name" style="margin-top: 7px;">Recipient:</label>
+                        <input type="text" id="name" class="name" style="width: 100%;">
+                        <label for="details">Details:</label>
+                        <input type="text" id="details" class="details" style="width: 100%;">
+                    </div>
+                    <button type="submit">Generate</button>
+                </form>
+            </div>
+            </div>
+            <!-- Reply Email Writer Form -->
+            <div class="form-section">
+            <div id="replyEmailForm" class="form-section-3">
+                <h2>Reply Email Writer</h2>
+                <hr class="divider">
+                <form method="POST" action="" id="replyemailGeneratorForm">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="emailBody">Email body:</label>
+                        <textarea id="emailBody" name="emailBody" required cols="70" rows="10"></textarea>
+                        <label for="replytone">Tone</label>
+                        <select id="replytone" class="dropdown" style="width: 500px;"> <!-- Default Neutral option -->
+                            <option value="accusatory">Accusatory 👎</option>
+                            <option value="angry">Angry 😡</option>
+                            <option value="appreciative">Appreciative 🙌</option>
+                            <option value="assertive">Assertive ☝</option>
+                            <option value="concerned">Concerned 😟</option>
+                            <option value="confident">Confident 💪</option>
+                            <option value="cooperative">Cooperative 🤝</option>
+                            <option value="curious">Curious 🧐</option>
+                            <option value="disapproving">Disapproving 😠</option>
+                            <option value="disheartening">Disheartening 😞</option>
+                            <option value="egocentric">Egocentric 😤</option>
+                            <option value="empathetic">Empathetic 😌</option>
+                            <option value="encouraging">Encouraging 👍</option>
+                            <option value="enthusiastic">Enthusiastic 😃</option>
+                            <option values="excited">Excited 🤩</option>
+                            <option value="friendly">Friendly 😉</option>
+                            <option value="funny">Funny 😂</option>
+                            <option value="joyful">Joyful 😊</option>
+                            <option value="neutral" selected>Neutral 😐</option>
+                            <option value="optimistic">Optimistic ✌️</option>
+                            <option value="regertful">Regretful 😥</option>
+                            <option value="sad">Sad 🙁</option>
+                            <option value="serious">Serious 😐</option>
+                            <option value="surprised">Surprised 😮</option>
+                            <option value="unassuming">Unasumming  🙄</option>
+                            <option value="worried">Worried 😨</option>
+                        </select>
+                        <label for="replywriting-style" style="margin-top: 7px;">Writing style</label>
+                        <select id="replywriting-style" style="width: 500px;">
+                            <optgroup label="Default">
+                                <option value="casual">Casual</option>
+                                <option value="formal">Formal</option>
+                            </optgroup>
+                            <optgroup label="Expository">
+                                <option value="academic">Academic</option>
+                                <option value="business">Business</option>
+                                <option value="essay">Essay</option>
+                                <option value="how-to">How-to</option>
+                                <option value="instructions">Instructions</option>
+                                <option value="journalism">Journalism</option>
+                                <option value="legal">Legal</option>
+                            </optgroup>
+                            <optgroup label="Persuasive">
+                                <option value="advertising">Advertising</option>
+                                <option value="cover letter">Cover Letter</option>
+                                <option value="editorial">Editorial</option>
+                                <option value="letter of recommendation">Letter of Recommendation</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="opinion">Opinion</option>
+                                <option value="review">Review</option>
+                                <option value="sale">Sale</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <button type="submit">Generate</button>
+                </form>
+            </div>
+            </div>
+        </section>
+    </main>
+    
+    <div class="result" id="result" style="display: none;">
+        <div style="display: flex;">
+            <h2>Your Suggest Email</h2>
+            <button onclick="copyText('subjectModal')">Copy</button>
+        </div>
+        <hr>
+        <div class="output" id="output"></div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeRegisterModal">&times;</span> <!-- Close Register Modal -->
+            <h2>Register</h2>
+            <form method="POST" action="{% url 'register' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="register-btn">Register</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModalBtn">&times;</span> <!-- Close Login Modal -->
+            <h2>Login</h2>
+            <form  method="POST" action="{% url 'login' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="login-btn">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Modal handling for Register
+        var registerModal = document.getElementById("registerModal");
+        var openRegisterBtn = document.getElementById("openRegisterModal");
+        var closeRegisterBtn = document.getElementById("closeRegisterModal");
+
+        openRegisterBtn.onclick = function() {
+            registerModal.style.display = "block";
+        }
+
+        closeRegisterBtn.onclick = function() {
+            registerModal.style.display = "none";
+        }
+
+        // Modal handling for Login
+        var loginModal = document.getElementById("loginModal");
+        var openLoginModalBtn = document.getElementById("openModalBtn");
+        var closeLoginModalBtn = document.getElementById("closeModalBtn");
+
+        openLoginModalBtn.onclick = function() {
+            loginModal.style.display = "block";
+        }
+
+        closeLoginModalBtn.onclick = function() {
+            loginModal.style.display = "none";
+        }
+
+        // Close modal if user clicks outside of it
+        window.onclick = function(event) {
+            if (event.target == registerModal) {
+                registerModal.style.display = "none";
+            }
+            if (event.target == loginModal) {
+                loginModal.style.display = "none";
+            }
+        }
+        function showForm(formId) {
+            // Hide all forms
+            // window.location.href = "{% url 'index' %}"; 
+            var forms = document.querySelectorAll('.form-section > div'); // Selects all form sections
+            forms.forEach(function(form) {
+                form.classList.remove('active-form'); // Remove active class to hide
+            });
+            document.getElementById('result').style.display = 'none';
+            // Show the selected form
+
+            document.getElementById(formId).classList.add('active-form'); // Add active class to the selected form
+        }
+    </script>
+    <script>
+        $(document).ready(function() {
+            $('#tone').select2({
+                placeholder: "Select a tone",
+                allowClear: true
+            });
+        });
+
+        $(document).ready(function() {
+            $('#writing-style').select2({
+                placeholder: "Select a writing style",  // Placeholder text
+                allowClear: true,  // Allow clear (reset)
+                width: 'resolve',  // Automatically adjusts the width to fit the container
+                theme: "default"   // You can change the theme if needed
+            });
+        });
+        $(document).ready(function() {
+            $('#replytone').select2({
+                placeholder: "Select a tone",
+                allowClear: true
+            });
+        });
+
+        $(document).ready(function() {
+            $('#replywriting-style').select2({
+                placeholder: "Select a writing style",  // Placeholder text
+                allowClear: true,  // Allow clear (reset)
+                width: 'resolve',  // Automatically adjusts the width to fit the container
+                theme: "default"   // You can change the theme if needed
+            });
+        });
+    </script>
+    <script>
+        // var data = JSON.parse("{{data|escapejs}}");
+        // var value = "response_text";  
+        // var res = data[value];
+        // if(res !== null){
+        //     displayResponse(res);
+        // }
+        // function displayResponse(response_text) {
+        //     const resultDiv = document.getElementById('result');
+        //     const outputDiv = document.getElementById('output');
+
+        //     // Check if response_text has a value
+        //     if (response_text && response_text.trim() !== '') {
+        //         // Set the content of the output div
+        //         outputDiv.textContent = response_text;
+
+        //         // Make the result div visible
+        //         resultDiv.style.display = 'block';
+        //     }
+        // }
+    </script>
+    <script>
+        document.getElementById('emailGeneratorForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+    
+            var xhr = new XMLHttpRequest(); // Create a new XMLHttpRequest object
+            xhr.open('POST', '{% url "email-generation" %}', true); // Configure it
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            var csrfToken = "{{ csrf_token }}";
+            xhr.setRequestHeader("X-CSRFToken", csrfToken);
+    
+            // Prepare the data to be sent
+            var formData = new FormData(this);
+            var params = new URLSearchParams(formData).toString(); // Serialize the form data
+    
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) { // Request is complete
+                    if (xhr.status === 200) { // Success
+                        var response = JSON.parse(xhr.responseText); // Parse the JSON response
+                        document.getElementById('result').style.display = 'block';
+                        document.getElementById('output').innerHTML = response.response_text; // Display generated email
+                    } 
+                }
+            };
+    
+            xhr.send(params); // Send the request with the serialized form data
+        });
+    </script>
+    <script>
+        document.getElementById('subjectGeneratorForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+    
+            var xhr = new XMLHttpRequest(); // Create a new XMLHttpRequest object
+            xhr.open('POST', '{% url "subject-generation" %}', true); // Configure it
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            var csrfToken = "{{ csrf_token }}";
+            xhr.setRequestHeader("X-CSRFToken", csrfToken);
+    
+            // Prepare the data to be sent
+            var formData = new FormData(this);
+            var params = new URLSearchParams(formData).toString(); // Serialize the form data
+    
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) { // Request is complete
+                    if (xhr.status === 200) { // Success
+                        var response = JSON.parse(xhr.responseText); // Parse the JSON response
+                        document.getElementById('result').style.display = 'block';
+                        document.getElementById('output').innerHTML = response.response_text; // Display generated email
+                    } 
+                }
+            };
+    
+            xhr.send(params); // Send the request with the serialized form data
+        });
+    </script>
+        <script>
+            document.getElementById('replyemailGeneratorForm').addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevent the default form submission
+        
+                var xhr = new XMLHttpRequest(); // Create a new XMLHttpRequest object
+                xhr.open('POST', '{% url "reply-email-generation" %}', true); // Configure it
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                var csrfToken = "{{ csrf_token }}";
+                xhr.setRequestHeader("X-CSRFToken", csrfToken);
+        
+                // Prepare the data to be sent
+                var formData = new FormData(this);
+                var params = new URLSearchParams(formData).toString(); // Serialize the form data
+        
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === XMLHttpRequest.DONE) { // Request is complete
+                        if (xhr.status === 200) { // Success
+                            var response = JSON.parse(xhr.responseText); // Parse the JSON response
+                            document.getElementById('result').style.display = 'block';
+                            document.getElementById('output').innerHTML = response.response_text; // Display generated email
+                        } 
+                    }
+                };
+        
+                xhr.send(params); // Send the request with the serialized form data
+            });
+            function copyText(modalId) {
+                // Select the readonly textarea for the AI generated subject line
+                var textarea = document.querySelector(`#${modalId} .modal-sections .section textarea[readonly]`)
+              
+                // Check if the textarea exists
+                if (textarea) {
+                  textarea.select() // Select the text in the textarea
+                  document.execCommand('copy') // Copy the selected text
+                  alert('Text copied to clipboard!') // Alert the user
+                } else {
+                  alert('Text copied to clipboard!')
+                }
+              }
+        </script>
+    
+</body>
+</html>
