@@ -1,4 +1,6 @@
 # 📧 MailMaster-AI-Email-Generator  
+=====================================
+
 
 An **AI-driven email writing assistant** that uses the **LLaMA2 model** to generate, edit, and manage emails efficiently. Users can compose **formal or informal emails**, modify AI-generated drafts, and access **predefined templates** for common email types.  
 
@@ -20,3 +22,4 @@ An **AI-driven email writing assistant** that uses the **LLaMA2 model** to gener
 - **Prakruti Bhavsar**  
 - **Payal Gupta**
 - **Urvi Joshi**
+
